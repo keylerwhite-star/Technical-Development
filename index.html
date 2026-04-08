@@ -3,18 +3,542 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Test Page</title>
+  <title>Master Study Plan</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <style>
-    body { font-family: sans-serif; background:#0a0a0f; color:#e0e0e0; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
-    .box { text-align:center; }
-    a { color:#00d4ff; }
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html,body,#app { height: 100%; }
+    body {
+      font-family: "Courier New", Courier, monospace;
+      background: #0a0a0f;
+      min-height: 100vh;
+      color: #e0e0e0;
+      padding: 0;
+    }
+    .header { background: linear-gradient(180deg, #0a0a0f 0%, #0f0f1a 100%); border-bottom: 1px solid #1a1a2e; padding: 32px 24px 24px; text-align: center; }
+    .header-eyebrow { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 6px; color: #444; text-transform: uppercase; margin-bottom: 12px; }
+    .header-title { font-family: 'Orbitron', sans-serif; font-size: clamp(22px, 4vw, 42px); font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 0 40px rgba(255,255,255,0.1); margin-bottom: 6px; }
+    .header-sub { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #555; letter-spacing: 3px; }
+    .track-tabs { display: flex; border-bottom: 1px solid #1a1a2e; }
+    .track-tab { flex: 1; padding: 16px 24px; cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; text-align: center; transition: all 0.2s; border: none; outline: none; background: #0a0a0f; color: #333; }
+    .track-tab.space { border-right: 1px solid #1a1a2e; }
+    .track-tab.space.active { background: #001a26; color: #00d4ff; border-bottom: 2px solid #00d4ff; }
+    .track-tab.air.active { background: #1a0f00; color: #ff6b35; border-bottom: 2px solid #ff6b35; }
+    .layout { display: flex; height: calc(100vh - 160px); overflow: hidden; }
+    .sidebar { width: 260px; min-width: 260px; border-right: 1px solid #1a1a2e; overflow-y: auto; padding: 16px 0; background: #0a0a0f; }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: #0a0a0f; }
+    .sidebar::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+    .sidebar-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 4px; color: #333; text-transform: uppercase; padding: 0 20px 12px; }
+    .module-btn { width: 100%; text-align: left; padding: 14px 20px; background: none; border: none; cursor: pointer; border-left: 3px solid transparent; transition: all 0.15s; display: block; color: inherit; }
+    .module-btn:hover { background: #0f0f1a; }
+    .module-btn.active-space { background: #001a26; border-left-color: #00d4ff; }
+    .module-btn.active-air { background: #1a0f00; border-left-color: #ff6b35; }
+    .module-num { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 3px; margin-bottom: 4px; color: #444; }
+    .module-name { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ccc; line-height: 1.4; margin-bottom: 4px; }
+    .module-dur { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #444; }
+    .main { flex: 1; overflow-y: auto; padding: 0; }
+    .main::-webkit-scrollbar { width: 4px; }
+    .main::-webkit-scrollbar-track { background: #0a0a0f; }
+    .main::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+    .placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #222; text-align: center; padding: 40px; }
+    .placeholder-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+    .placeholder-text { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 4px; color: #333; }
+    .module-header { padding: 24px 28px 20px; border-bottom: 1px solid #1a1a2e; position: sticky; top: 0; background: #0a0a0f; z-index: 10; }
+    .module-header-num { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 4px; margin-bottom: 6px; color: #bbb; }
+    .module-header-title { font-family: 'Orbitron', sans-serif; font-size: clamp(16px, 2.5vw, 22px); font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .module-header-sub { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #555; margin-bottom: 8px; }
+    .module-header-dur { font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 2px; display: inline-block; }
+    .weeks-container { padding: 14px 20px 40px; }
+    .week-card { border: 1px solid #1a1a2e; border-radius: 2px; margin-bottom: 7px; overflow: hidden; transition: border-color 0.2s; }
+    .week-card:hover { border-color: #2a2a3e; }
+    .week-card.open-space { border-color: #00d4ff33; }
+    .week-card.open-air { border-color: #ff6b3533; }
+    .week-header { display: flex; align-items: center; padding: 13px 16px; cursor: pointer; background: #0d0d16; gap: 14px; }
+    .week-header:hover { background: #0f0f1a; }
+    .week-num { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; min-width: 50px; letter-spacing: 1px; color: #bbb; }
+    .week-theme { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #bbb; flex: 1; }
+    .project-dot { width: 6px; height: 6px; border-radius: 50%; min-width: 6px; }
+    .chevron { font-size: 10px; color: #444; transition: transform 0.2s; min-width: 16px; text-align: right; }
+    .chevron.open { transform: rotate(180deg); }
+    .week-body { padding: 0 16px 16px; background: #0a0a0f; display: flex; flex-direction: column; gap: 9px; }
+    .activity-row { display: flex; gap: 10px; padding: 11px 13px; border-radius: 2px; background: #0d0d16; border: 1px solid #1a1a2e; }
+    .activity-day { font-family: 'Orbitron', sans-serif; font-size: 8px; font-weight: 700; letter-spacing: 2px; min-width: 76px; padding-top: 2px; line-height: 1.6; color: #bbb; }
+    .activity-type { font-family: 'Share Tech Mono', monospace; font-size: 8px; letter-spacing: 2px; padding: 2px 6px; border-radius: 1px; height: fit-content; margin-top: 1px; min-width: 68px; text-align: center; }
+    .activity-content { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #aaa; line-height: 1.65; flex: 1; }
+    .project-box { margin-top: 2px; padding: 11px 13px; border-radius: 2px; border-left: 3px solid; background: #0d0d16; }
+    .project-box-label { font-family: 'Orbitron', sans-serif; font-size: 8px; letter-spacing: 3px; font-weight: 700; margin-bottom: 6px; }
+    .project-box-text { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #aaa; line-height: 1.65; }
+    @media (max-width: 700px) {
+      .layout { flex-direction: column; height: auto; }
+      .sidebar { width: 100%; min-width: 0; border-right: none; border-bottom: 1px solid #1a1a2e; height: auto; max-height: 220px; }
+      .activity-row { flex-direction: column; gap: 6px; }
+      .activity-day { min-width: 0; }
+    }
+    button { background: none; border: none; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>GitHub Pages Test</h1>
-    <p>If you see this rendered, Pages is working.</p>
-    <p><a href="/">Reload</a></p>
+  <div id="app">
+    <div class="header">
+      <div class="header-eyebrow">SENKU ISHIGAMI PRESENTS</div>
+      <div class="header-title">MASTER STUDY PLAN</div>
+      <div class="header-sub">AEROSPACE · PROPULSION · DIRECTED ENERGY · ~4 YEAR PROGRAM</div>
+    </div>
+
+    <div id="trackTabs" class="track-tabs"></div>
+
+    <div class="layout">
+      <div class="sidebar" id="sidebar">
+        <div class="sidebar-label">Modules</div>
+        <div id="modulesList"></div>
+      </div>
+
+      <div class="main" id="main">
+        <!-- main content injected here -->
+      </div>
+    </div>
   </div>
+
+  <script>
+    // Full data (same as original). For brevity here, we paste it unchanged.
+    const tracks = [
+      {
+        id: "space",
+        label: "TRACK A — SPACE DOMINANCE",
+        color: "#00d4ff",
+        accent: "#003a4d",
+        modules: [
+          {
+            id: 1,
+            title: "Chemical Propulsion",
+            subtitle: "Build the rocket science bedrock",
+            duration: "12 weeks",
+            weeks: [
+              { week: 1, theme: "Rocket Equation & Thermodynamic Foundations", weekday: { label: "Reading", content: "Sutton & Biblarz Ch. 1–2: History, Definitions, Rocket Equation derivation" }, weekend: { label: "Lecture + Problem Set", content: "MIT OCW 16.512 Lecture 1–2. Derive the Tsiolkovsky rocket equation from Newton's 2nd law from scratch, including gravity losses and drag. Show all steps." }, project: null },
+              { week: 2, theme: "Nozzle Thermodynamics", weekday: { label: "Reading", content: "Sutton Ch. 3: Nozzle theory, isentropic flow, area-velocity relation, exit conditions" }, weekend: { label: "Lecture + Problem Set", content: "MIT OCW 16.512 Lecture 3–4. Size a converging-diverging nozzle for a given chamber pressure, propellant, and thrust level. Compute exit velocity, exit pressure, and Isp." }, project: null },
+              { week: 3, theme: "Propellant Chemistry & Performance", weekday: { label: "Reading", content: "Sutton Ch. 5: Propellant properties, Isp tables, monoprop vs biprop, propellant selection trades" }, weekend: { label: "Assignment", content: "Build a propellant comparison table (LCH4/LOX, LH2/LOX, RP-1/LOX, MMH/NTO). For each: theoretical Isp, density Isp, handling risk, cost. Justify Raptor's propellant choice." }, project: "PROJECT KICKOFF: Define your regenerative cooling model. Select propellant (LCH4/LOX), engine class (100 kN), and gather real engine geometry data from literature." },
+              { week: 4, theme: "Combustion Fundamentals", weekday: { label: "Reading", content: "Turns: Combustion Ch. 1–3: stoichiometry, adiabatic flame temperature, equivalence ratio" }, weekend: { label: "Lecture + Problem Set", content: "MIT OCW 16.512 Lecture 5. Calculate adiabatic flame temperature for LCH4/LOX at various O/F ratios. Find the O/F that maximizes Isp. Compare to NASA CEA output." }, project: null },
+              { week: 5, theme: "Engine Cycles", weekday: { label: "Reading", content: "Huzel & Huang Ch. 1–2: Gas generator, staged combustion, expander, full-flow staged combustion cycles" }, weekend: { label: "Lecture + Assignment", content: "MIT OCW 16.512 Lecture 6–7. Draw full thermodynamic cycle diagrams (T-s and P-h) for GG vs full-flow staged combustion. Identify where efficiency is gained/lost in each." }, project: "PROJECT CHECK-IN 1: Complete literature review. Document channel geometry, heat flux values, and material properties. Begin Python script structure." },
+              { week: 6, theme: "Combustion Instability", weekday: { label: "Reading", content: "Sutton Ch. 9: Combustion instability modes (chugging, screaming, buzzing), acoustic modes, baffle design" }, weekend: { label: "Reading + Deep Dive", content: "NASA SP-194: Liquid Propellant Rocket Combustion Instability (selected chapters). Write a 2-page summary of the F-1 engine instability problem and how it was solved." }, project: null },
+              { week: 7, theme: "Injector Design", weekday: { label: "Reading", content: "Huzel & Huang Ch. 4: Injector types (impinging, coaxial, swirl), atomization, mixing efficiency" }, weekend: { label: "Assignment", content: "Compare injector designs: F-1 (impinging doublets) vs Merlin (pintle) vs Raptor (coaxial swirl). For each: atomization mechanism, stability characteristics, manufacturability." }, project: "PROJECT CHECK-IN 2: 1D thermal model solving for wall temperature at the throat. Coolant inlet conditions set. Solving energy balance." },
+              { week: 8, theme: "Regenerative Cooling — Deep Dive", weekday: { label: "Reading", content: "NASA SP-8120 Ch. 4–5: Regenerative cooling design, Bartz equation, heat flux distribution, channel sizing" }, weekend: { label: "Lecture + Problem Set", content: "Everyday Astronaut Raptor deep-dive (YouTube). Apply the Bartz equation to compute local heat flux at throat and nozzle for your model engine. Compare to RS-25 published data." }, project: null },
+              { week: 9, theme: "Thrust Chamber & Structural Design", weekday: { label: "Reading", content: "Sutton Ch. 8 + Huzel Ch. 3: Chamber geometry, L*, contraction ratio, nozzle contour (bell vs conical), structural loads" }, weekend: { label: "Assignment", content: "Size a complete thrust chamber for 100 kN thrust, LCH4/LOX. Document: chamber dimensions, L*, nozzle contour, expansion ratio, and wall thickness using hoop stress equation." }, project: "PROJECT CHECK-IN 3: Full axial temperature distribution (chamber → nozzle exit). Identify critical heat flux location. Begin critical heat flux margin analysis." },
+              { week: 10, theme: "Altitude Compensation & Advanced Nozzles", weekday: { label: "Reading", content: "Sutton Ch. 3 (continued) + AIAA papers on aerospike, extendable nozzles, altitude-compensating concepts" }, weekend: { label: "Assignment", content: "Calculate Isp vs altitude for a fixed nozzle vs ideal expansion. Quantify performance loss at sea level and vacuum. Write a 1-page case for or against aerospike on a first-stage vehicle." }, project: null },
+              { week: 11, theme: "Systems Integration & Modern Engines", weekday: { label: "Reading", content: "NASA SP-125 Ch. 1–3 + Read 2 AIAA papers on Raptor or BE-4 engine development" }, weekend: { label: "Lecture + Analysis", content: "MIT OCW 16.512 Lecture 8–9. Map every subsystem of the SpaceX Raptor engine. For each: function, operating conditions, design challenge. Connect to concepts from weeks 1–10." }, project: "PROJECT CHECK-IN 4: Model complete. Begin validation against published RS-25 or Merlin cooling data. Document discrepancies." },
+              { week: 12, theme: "Module Review & Project Finalization", weekday: { label: "Review", content: "Re-read your notes from weeks 1–11. Identify your 5 weakest areas. Do targeted re-reading on each." }, weekend: { label: "Project Completion", content: "Finalize regenerative cooling model. Write engineering report: background, methodology, results, validation, conclusions. Include T-s diagrams and wall temperature plots. This is a portfolio document." }, project: "PROJECT COMPLETE: Regenerative Cooling Channel Model — formal engineering report delivered." }
+            ]
+          },
+          {
+            id: 2,
+            title: "Nuclear & Electric Propulsion",
+            subtitle: "The unhinged frontier of space propulsion",
+            duration: "16 weeks",
+            weeks: [
+              { week: 1, theme: "Electric Propulsion Overview & Ion Engines", weekday: { label: "Reading", content: "Jahn Ch. 1–2: EP fundamentals, thrust equation for low-thrust systems, Isp vs thrust density trade space" }, weekend: { label: "Lecture + Problem Set", content: "Princeton MAE 571 Lecture 1–2 (YouTube). Plot Isp vs thrust for all EP classes (resistojet, arcjet, ion, Hall, MPD). Calculate transit time to Mars for chemical vs EP at fixed power." }, project: "PROJECT KICKOFF: Select your Mars mission architecture. Define: payload mass, departure C3, arrival date window. Gather Isp and thrust data for each propulsion option." },
+              { week: 2, theme: "Ion Engine Physics", weekday: { label: "Reading", content: "Jahn Ch. 3–4: Plasma physics basics, ionization, beam extraction, grid erosion, neutralization" }, weekend: { label: "Assignment", content: "Work through ion thruster performance equations: beam current, thrust, Isp as a function of accelerating voltage and propellant (Xe, Kr, I). Reproduce Dawn mission thruster performance from published specs." }, project: null },
+              { week: 3, theme: "Hall Effect Thrusters", weekday: { label: "Reading", content: "Goebel & Katz 'Fundamentals of Electric Propulsion' Ch. 6 (free NASA JPL publication online)" }, weekend: { label: "Lecture + Problem Set", content: "AIAA Hall thruster webinar (YouTube). Derive thrust and Isp for a Hall thruster from first principles. Calculate efficiency for SPT-100 specs and compare to published values." }, project: "PROJECT CHECK-IN 1: Chemical propulsion case complete. Δv budget, IMLEO, transit time calculated for Hohmann transfer." },
+              { week: 4, theme: "Advanced EP — MPD, VASIMR, Arcjets", weekday: { label: "Reading", content: "Jahn Ch. 7–8: Electromagnetic thrusters, MPD self-field vs applied-field, VASIMR plasma heating concept" }, weekend: { label: "Assignment", content: "Compare: ion engine vs Hall thruster vs VASIMR for a 200 kW NEP Mars mission. Table: Isp, thrust, power, TRL, mass. Write a 1-page recommendation with justification." }, project: null },
+              { week: 5, theme: "Nuclear Fission Basics for Propulsion", weekday: { label: "Reading", content: "Glasstone & Lovberg Ch. 1–3: Fission fundamentals, reactor criticality, moderator/reflector roles, reactor types" }, weekend: { label: "Lecture", content: "Howe Institute NTP lecture series (YouTube). Focus on building conceptual nuclear physics intuition. Take detailed notes on fission energy release and how it compares to chemical combustion (MJ/kg vs GJ/kg)." }, project: "PROJECT CHECK-IN 2: NTP case complete. Δv budget at Isp=900s, reactor mass fraction assumed from NERVA data, IMLEO calculated." },
+              { week: 6, theme: "Nuclear Thermal Propulsion — NERVA & History", weekday: { label: "Reading", content: "Borowski et al. NTRS papers on NERVA heritage + NASA NTP program overview reports (search NTRS: 'nuclear thermal propulsion NERVA')" }, weekend: { label: "Assignment", content: "Write a 3-page technical history of NERVA: design approach, test results, Isp achieved, reasons for cancellation. What would have been different if the program continued?" }, project: null },
+              { week: 7, theme: "Modern NTP — DRACO & Current Programs", weekday: { label: "Reading", content: "DARPA DRACO program public documents + recent AIAA papers on NTP reactor concepts (search AIAA Arc: 'nuclear thermal propulsion 2022 2023 2024')" }, weekend: { label: "Lecture + Analysis", content: "Watch DARPA DRACO program overview presentations (public). Compare DRACO design approach to NERVA. What changed? What's the same? Focus on reactor design philosophy and fuel form." }, project: "PROJECT CHECK-IN 3: NEP case complete. Solar array vs nuclear reactor power source trade. IMLEO calculated. Begin sensitivity analysis." },
+              { week: 8, theme: "Nuclear Electric Propulsion Systems", weekday: { label: "Reading", content: "NASA Kilopower / KRUSTY reactor papers (NASA GRC — free on NTRS). Focus on power conversion: Stirling engine coupling to reactor." }, weekend: { label: "Problem Set", content: "Size a NEP system for 200 kW electrical output. Given: KRUSTY reactor thermal output, Stirling efficiency ~25%, calculate: reactor mass, radiator area for waste heat rejection, thruster array sizing." }, project: null },
+              { week: 9, theme: "Radioisotope Systems & Deep Space Power", weekday: { label: "Reading", content: "NASA RTG program papers + MMRTG specifications. Pu-238 production, specific power, decay heat, GPHS module design." }, weekend: { label: "Assignment", content: "Compare RTG vs solar array for a Jupiter mission. Calculate power available at 5 AU from solar panels (1/r² falloff). At what distance does RTG become preferable? Plot power vs distance for both." }, project: "PROJECT CHECK-IN 4: All three cases complete. Begin comparison table: transit time, IMLEO, cost proxy, risk assessment." },
+              { week: 10, theme: "Mission Design for Low-Thrust Trajectories", weekday: { label: "Reading", content: "Frisbee 'Advanced Space Propulsion' paper (AIAA 2003). Focus on optimal trajectory shaping for low-thrust systems." }, weekend: { label: "Lecture + Tool", content: "Install and run GMAT (free NASA tool). Run a basic Earth-Mars trajectory. Understand how low-thrust spiral trajectories differ from impulsive burns. Export Δv data for your trade study." }, project: null },
+              { week: 11, theme: "Fusion & Pulsed Nuclear Propulsion", weekday: { label: "Reading", content: "Glasstone & Lovberg Ch. 4–6 + Project Orion declassified documents + Freeman Dyson retrospective papers." }, weekend: { label: "Assignment", content: "Estimate Orion Isp and thrust from published detonation yield and pusher plate geometry. Read 2 NIAC fusion propulsion reports. Write 1-page critical analysis per report." }, project: "PROJECT CHECK-IN 5: Draft trade study complete. All cases compared. Begin writing formal report structure." },
+              { week: 12, theme: "TRL Assessment & Propulsion System Integration", weekday: { label: "Reading", content: "Read 3 recent AIAA SciTech papers (2023–2025) on advanced propulsion. Track citations and find the key research groups." }, weekend: { label: "Assignment", content: "Build a TRL assessment chart for all propulsion types covered. For each: current TRL, key remaining challenges, estimated time to TRL 6, primary funding agency." }, project: "PROJECT CHECK-IN 6: Conclusions and recommendation section drafted. Begin formatting as formal report." },
+              { week: 13, theme: "Module Review & Project Finalization", weekday: { label: "Review", content: "Review all notes. Identify knowledge gaps. Re-read targeted sections." }, weekend: { label: "Project Completion", content: "Finalize Mars mission trade study. Polish report: executive summary, full analysis, trade tables, T-s diagrams where applicable, bibliography. Submit-quality document." }, project: "PROJECT COMPLETE: Nuclear vs Chemical vs NEP Mars Mission Trade Study — formal report delivered." }
+            ]
+          },
+          {
+            id: 3,
+            title: "Space Thermal & Planetary Survival",
+            subtitle: "Your deepest expertise meets the harshest environment",
+            duration: "16 weeks",
+            weeks: [
+              { week: 1, theme: "Spacecraft Thermal Environments", weekday: { label: "Reading", content: "Gilmore Vol. 1 Ch. 1–2: Orbital thermal environments, solar flux, Earth IR, albedo, eclipse fractions" }, weekend: { label: "Problem Set", content: "Calculate worst-case hot and cold thermal environments for LEO, GEO, and Mars orbit. For each: max/min solar flux, eclipse duration, equilibrium temperature of a black sphere." }, project: "PROJECT KICKOFF: Define your Mars habitat model. Select location (Jezero Crater), habitat geometry (cylinder, 6m dia × 12m), and list all thermal loads and boundary conditions." },
+              { week: 2, theme: "Radiation Heat Transfer in Space", weekday: { label: "Reading", content: "Gilmore Ch. 3: Radiation fundamentals, view factors, surface properties (α, ε), multilayer radiation exchange" }, weekend: { label: "Problem Set", content: "Calculate view factors for your habitat cylinder to Mars surface, sky, and sun. Set up the radiative exchange network. This is the foundation of your project model." }, project: null },
+              { week: 3, theme: "Passive Thermal Control", weekday: { label: "Reading", content: "Gilmore Ch. 4–5: MLI design, surface coatings, optical solar reflectors, louvers, thermal isolation techniques" }, weekend: { label: "Assignment", content: "Size MLI blanket for the habitat exterior. Given Mars thermal environment, calculate heat leak into habitat with and without MLI. Calculate MLI mass. Document coating selection (α/ε ratio)." }, project: "PROJECT CHECK-IN 1: Lumped-capacitance model structure coded. Nodes defined. Radiative and conductive couplings between nodes established." },
+              { week: 4, theme: "Heat Pipes — Theory & Design", weekday: { label: "Reading", content: "Dunn & Reay Ch. 1–4: Heat pipe operating principles, capillary limit, sonic limit, flooding limit, wick design" }, weekend: { label: "Problem Set", content: "Design a heat pipe for a 500W spacecraft electronic box. Select: working fluid, wick structure, operating temperature. Calculate all transport limits. Is your design feasible?" }, project: null },
+              { week: 5, theme: "Loop Heat Pipes & Variable Conductance", weekday: { label: "Reading", content: "Dunn & Reay Ch. 6–7 + AIAA papers on loop heat pipes and variable conductance heat pipes for Mars rovers (JPL technical papers)" }, weekend: { label: "Assignment", content: "Compare LHP vs conventional heat pipe for a Mars rover thermal system. Temperature range: -80°C to +40°C. Power: 100W waste heat. Which architecture? Why? What's the startup challenge?" }, project: "PROJECT CHECK-IN 2: Nominal case (daytime, clear sky) solved. Habitat temperature computed. Internal heat load from crew and equipment included." },
+              { week: 6, theme: "Active Thermal Control Systems", weekday: { label: "Reading", content: "Gilmore Ch. 7: Fluid loops, pump design, accumulator, heat exchanger sizing, working fluids for space" }, weekend: { label: "Problem Set", content: "Size a single-phase fluid loop for the habitat: 5 kW internal heat load, 20°C habitat interior, radiator rejection to Mars sky. Calculate: flow rate, tubing diameter, pump power, radiator area." }, project: null },
+              { week: 7, theme: "Radiator Design for Space", weekday: { label: "Reading", content: "Gilmore Ch. 8 + NASA GRC papers on advanced radiators (heat pipe radiators, deployable radiators, liquid droplet radiators)" }, weekend: { label: "Assignment", content: "Size a deployable radiator panel for the habitat. Mars sky as sink. Rejection: 5 kW nominal, 8 kW peak. Calculate panel area, mass, and folded volume. Compare fixed vs deployable architecture." }, project: "PROJECT CHECK-IN 3: Dust storm case solved. How does habitat temperature change? What does the thermal control system have to do differently?" },
+              { week: 8, theme: "Cryogenic Systems & Propellant Storage", weekday: { label: "Reading", content: "AIAA/NTRS papers on zero-boiloff cryogenic storage + Gilmore Ch. 9: Cryogenic spacecraft thermal control" }, weekend: { label: "Problem Set", content: "Design a cryogenic LO2 storage system on the Mars surface. Ambient: -60°C avg. Calculate boiloff rate with MLI only, then with active cooling (Stirling cryocooler). Size the cryocooler." }, project: null },
+              { week: 9, theme: "Life Support Thermodynamics — ECLSS", weekday: { label: "Reading", content: "NASA STD-3001 (MSIS) Vol. 1 + NASA ECLSS technical papers on ISS water recovery, CO2 removal, O2 generation" }, weekend: { label: "Assignment", content: "Work through ISS ECLSS mass balance: 4 crew, closed water loop, Sabatier CO2 reduction. Calculate: daily water recovery rate, O2 generation power, CO2 scrubber consumable mass per year." }, project: "PROJECT CHECK-IN 4: ECLSS thermal loads added to habitat model. Water and CO2 systems heat rejection quantified and included." },
+              { week: 10, theme: "ISRU — In-Situ Resource Utilization", weekday: { label: "Reading", content: "Balasubramaniam ISRU papers on NTRS + NASA MOXIE experiment results papers (Mars O2 production)" }, weekend: { label: "Assignment", content: "Design a MOXIE-scaled ISRU system for crew of 6 on Mars. Calculate O2 production rate needed (metabolic + propellant). Scale MOXIE power consumption. What's the power budget for full-scale ISRU?" }, project: null },
+              { week: 11, theme: "Surface Nuclear Power — Kilopower", weekday: { label: "Reading", content: "NASA GRC Kilopower/KRUSTY papers (full set). Focus on: reactor thermal output, Stirling conversion, heat rejection radiators, system mass" }, weekend: { label: "Problem Set", content: "Size a nuclear surface power system for your habitat. Loads: ECLSS (3 kW), lighting (1 kW), ISRU (10 kW), thermal control pump (0.5 kW). How many Kilopower units? What's radiator area?" }, project: "PROJECT CHECK-IN 5: Nuclear power system integrated into habitat model. Night survival case: no solar, nuclear only. Habitat survives? What's the minimum power mode?" },
+              { week: 12, theme: "Habitat Architecture — Systems Integration", weekday: { label: "Reading", content: "NASA SP-2017-218969 Technology Roadmaps TA07: Human Exploration Destinations. Read surface systems section fully." }, weekend: { label: "Assignment", content: "Draw a complete system block diagram of your Mars habitat: power, thermal, ECLSS, ISRU, communications. For each interface: what flows (power, heat, fluid, data)? Quantify each flow." }, project: "PROJECT CHECK-IN 6: All cases complete (nominal, dust storm, night). Sensitivity analysis: what parameter most affects habitat survivability?" },
+              { week: 13, theme: "Advanced Thermal Technologies & Lunar Comparison", weekday: { label: "Reading", content: "NIAC reports on advanced thermal concepts for planetary surfaces (2 Phase II reports) + Gilmore Ch. 12: Lunar thermal environment" }, weekend: { label: "Assignment", content: "Compare Mars vs Moon as habitat thermal environments. Which is harder? For each: temperature extremes, day/night cycle challenge, available resources. Write 2-page comparison plus 1-page NIAC critical assessment." }, project: "PROJECT CHECK-IN 7: Report drafted. All sections written. Figures and plots complete." },
+              { week: 14, theme: "Module Review & Project Finalization", weekday: { label: "Review", content: "Review all notes. Weakest areas: targeted re-reading." }, weekend: { label: "Project Completion", content: "Finalize Mars Habitat Thermal Architecture Model and Report. Sections: executive summary, thermal environment analysis, model description, results for all cases, system sizing, conclusions." }, project: "PROJECT COMPLETE: Mars Habitat Thermal Architecture — lumped capacitance model + formal engineering report." }
+            ]
+          },
+          {
+            id: 4,
+            title: "Emerging & Frontier Concepts",
+            subtitle: "The frontier — stay sharp on what's being funded now",
+            duration: "8 weeks",
+            weeks: [
+              { week: 1, theme: "Photon Propulsion & Laser Sails", weekday: { label: "Reading", content: "Forward 1984 JBIS laser sail paper + Lubin 2016 'Roadmap to Interstellar Flight' (arXiv) + Breakthrough Starshot technical papers" }, weekend: { label: "Problem Set", content: "Calculate photon pressure and acceleration for a 1g Starshot wafer at 100 GW laser power. Calculate velocity at end of laser engagement. What fraction of c? Transit time to Alpha Centauri?" }, project: "PROJECT KICKOFF: Select your concept topic. Write a 1-page concept abstract including: physics basis, mission application, and key technology gaps." },
+              { week: 2, theme: "Solar Sails & Rotating Detonation Engines", weekday: { label: "Reading", content: "IKAROS and LightSail 2 mission papers + AIAA papers on RDE (2020–2025, search AIAA Arc)" }, weekend: { label: "Problem Set", content: "Calculate LightSail 2 characteristic acceleration and spiral trajectory time. Separately: derive the thermodynamic cycle efficiency advantage of pressure-gain combustion (RDE) vs constant-pressure combustion. Two problems, one weekend." }, project: null },
+              { week: 3, theme: "Advanced Fission & Space Manufacturing", weekday: { label: "Reading", content: "NIAC Phase II reports on fission fragment rocket + gas core NTP (search NTRS) + AIAA papers on in-space manufacturing and ISAM roadmaps" }, weekend: { label: "Assignment", content: "Compare: solid core NTP vs gas core NTP vs fission fragment for Isp range and feasibility gap. Separately: identify 3 spacecraft components currently launch-constrained by fairing size and how ISAM changes them." }, project: "PROJECT CHECK-IN 1: Concept physics established. Key equations identified. Technology gaps documented." },
+              { week: 4, theme: "Non-Keplerian Trajectories & Advanced Astrodynamics", weekday: { label: "Reading", content: "AIAA papers on low-energy transfers, invariant manifolds, halo orbits + Lunar Gateway trajectory design documents" }, weekend: { label: "Problem Set", content: "Using GMAT: design a low-energy Earth-Moon transfer using the L1 Lagrange point. Compare Δv to a direct transfer. Calculate transfer time penalty. Is it worth it for a cargo mission?" }, project: null },
+              { week: 5, theme: "NIAC Deep Dive — Reading Current Frontier Research", weekday: { label: "Reading", content: "Read 3 NIAC Phase II reports from the most recent symposium in propulsion, power, or thermal management. Take detailed technical notes on each." }, weekend: { label: "Assignment", content: "For each NIAC report: what problem does it solve? What's the enabling physics? What's the TRL gap? What would it take to reach TRL 4? Write a 1-page critical assessment per report." }, project: "PROJECT CHECK-IN 2: Technology gaps identified. Development roadmap draft complete. Mission application fully defined." },
+              { week: 6, theme: "White Paper Drafting", weekday: { label: "Writing", content: "Draft sections 1–3 of your NIAC-style white paper: executive summary, concept description, and physics feasibility analysis." }, weekend: { label: "Writing + Review", content: "Draft sections 4–5: technology readiness gaps and mission application. Read 2 published NIAC Phase I proposals for formatting and argumentation style." }, project: "PROJECT CHECK-IN 3: White paper 70% complete. All sections drafted. Figures and equations included." },
+              { week: 7, theme: "Development Roadmap & Final Polish", weekday: { label: "Writing", content: "Draft section 6: development roadmap with TRL milestones, estimated timelines, and funding pathway. Add references." }, weekend: { label: "Project Completion", content: "Finalize NIAC-Style Concept White Paper. Final edit pass: clarity, technical rigor, formatting. Format: executive summary, concept, physics, tech gaps, mission application, roadmap, references." }, project: "PROJECT COMPLETE: NIAC-Style Concept White Paper — 10-15 pages, portfolio quality." }
+            ]
+          }
+        ]
+      },
+      {
+        id: "air",
+        label: "TRACK B — AIR DOMINANCE",
+        color: "#ff6b35",
+        accent: "#4d1f00",
+        modules: [
+          {
+            id: 5,
+            title: "Hypersonic Aerothermodynamics & TPS",
+            subtitle: "The most thermally violent environment humans have engineered through",
+            duration: "14 weeks",
+            weeks: [
+              { week: 1, theme: "High-Speed Flow Fundamentals", weekday: { label: "Reading", content: "Anderson Hypersonic Ch. 1–2: Review of compressible flow, oblique shocks, Prandtl-Meyer expansion, normal shock relations at high Mach" }, weekend: { label: "Problem Set", content: "Solve: oblique shock angles for a 10° wedge at Mach 5, 10, 20. Calculate post-shock pressure, temperature, density. Plot shock angle vs Mach. Identify detachment limit." }, project: "PROJECT KICKOFF: Select your vehicle geometry (generic HGV or X-51A-like wafer). Define trajectory: Mach 10 at 30km, Mach 15 at 40km, Mach 20 at 50km. Collect reference geometry data." },
+              { week: 2, theme: "High-Temperature Gas Effects", weekday: { label: "Reading", content: "Anderson Ch. 3–4: Vibrational excitation, dissociation, ionization, thermodynamic equilibrium vs non-equilibrium, real gas effects on shock properties" }, weekend: { label: "Problem Set", content: "For air at Mach 15, 50km altitude: calculate post-normal-shock temperature assuming (a) calorically perfect gas (b) equilibrium real gas (use tables/CEA). Quantify the difference. Why does it matter for TPS sizing?" }, project: null },
+              { week: 3, theme: "Boundary Layer at Hypersonic Speeds", weekday: { label: "Reading", content: "Anderson Ch. 6 + Bertin Ch. 3: Hypersonic boundary layer, viscous interaction, displacement thickness, pressure-viscous interaction parameter" }, weekend: { label: "Problem Set", content: "Calculate boundary layer thickness and viscous interaction parameter (χ) for your vehicle at each trajectory point. At what point does viscous interaction become significant? What does it do to pressure distribution?" }, project: "PROJECT CHECK-IN 1: Trajectory defined. Shock properties calculated at each trajectory point using real gas assumptions." },
+              { week: 4, theme: "Aerodynamic Heating — Stagnation Point", weekday: { label: "Reading", content: "Anderson Ch. 7: Fay-Riddell equation, Eckert reference enthalpy method, stagnation point heat flux, cold wall vs hot wall corrections" }, weekend: { label: "Problem Set", content: "Apply Fay-Riddell to calculate stagnation point heat flux for your vehicle at Mach 10, 15, 20. Then apply Eckert reference enthalpy for flat plate heating. Build a spreadsheet. This is the core of your project." }, project: null },
+              { week: 5, theme: "Boundary Layer Transition", weekday: { label: "Reading", content: "Anderson Ch. 8 + Scott Berry NASA LaRC transition papers. Transition correlations (Reθ/Me), roughness effects, transition on sharp vs blunt leading edges" }, weekend: { label: "Assignment", content: "Estimate transition Reynolds number for your vehicle at Mach 10. Is the boundary layer laminar or turbulent at mid-body? How does transition affect local heat flux? (Hint: turbulent heat flux can be 3-5x laminar.)" }, project: "PROJECT CHECK-IN 2: Stagnation point heat flux calculated at all trajectory points. Flat plate heating distribution estimated along vehicle centerline." },
+              { week: 6, theme: "Shock-Shock & Shock-Boundary Layer Interactions", weekday: { label: "Reading", content: "Anderson Ch. 9 + AIAA papers on Type IV shock-shock interaction (Edney classification). This is where the real localized heating spikes live." }, weekend: { label: "Assignment", content: "For your vehicle: identify all shock-shock interaction locations (control surfaces, inlet corners). Using Edney classification, determine interaction type. Qualitatively assess local heat flux amplification. This is a design driver." }, project: null },
+              { week: 7, theme: "Ablative TPS Materials", weekday: { label: "Reading", content: "NASA TM papers on PICA (Phenolic Impregnated Carbon Ablator), Avcoat, SLA-561V. Ablation physics: pyrolysis, char layer, blowing correction." }, weekend: { label: "Problem Set", content: "Size an ablative TPS layer for your vehicle stagnation region. Given heat flux from Fay-Riddell and total heat load (integrated over trajectory), calculate required PICA thickness and mass. Use published recession data." }, project: "PROJECT CHECK-IN 3: Peak heating and integrated heat load calculated for stagnation and critical locations. TPS material candidates selected." },
+              { week: 8, theme: "Hot Structure & UHTC Materials", weekday: { label: "Reading", content: "AIAA papers on UHTC (ZrB2, HfB2, HfC) + CMC (SiC/SiC) for hypersonic leading edges. Temperature limits, oxidation resistance, manufacturing challenges." }, weekend: { label: "Assignment", content: "Compare PICA vs CMC vs UHTC for your vehicle's leading edge (radius 5mm, Mach 10 stagnation heat flux). For each: max temperature, mass/unit area, cost, TRL. Which do you choose? Write a 2-page trade." }, project: null },
+              { week: 9, theme: "Space Shuttle TPS Lessons Learned", weekday: { label: "Reading", content: "NASA TM on Space Shuttle TPS design, Columbia accident technical reports (CAIB). What failed, why, and what the engineering community learned." }, weekend: { label: "Assignment", content: "Write a 3-page engineering post-mortem on Columbia: what was the thermal protection failure mode, what design decisions contributed, what would modern TPS design do differently?" }, project: "PROJECT CHECK-IN 4: TPS material selected for each vehicle zone. Sizing complete. Mass budget drafted." },
+              { week: 10, theme: "Hypersonic Vehicle Design Integration", weekday: { label: "Reading", content: "Bertin Ch. 7–8: Vehicle design for hypersonics, nose radius trades, leading edge design, body flap and control surface heating" }, weekend: { label: "Assignment", content: "For your vehicle: draw a TPS zoning map. Label each zone by: dominant heating mechanism, selected TPS material, thickness, and mass. This is the deliverable visual for your project report." }, project: null },
+              { week: 11, theme: "CFD Overview & Current Hypersonic Programs", weekday: { label: "Reading", content: "AIAA papers on CFD for hypersonics: grid requirements, turbulence models, thermochemical nonequilibrium + AIAA SciTech 2023–2025 papers on ARRW, HACM programs" }, weekend: { label: "Assignment", content: "Write a 2-page CFD approach document: what solver, grid, thermochemistry model, validation cases. Then read 3 recent AIAA papers on current hypersonic programs. Build a table: program, thermal challenge, approach, TRL." }, project: "PROJECT CHECK-IN 5: Report sections drafted: vehicle description, trajectory, heating environment, TPS selection rationale, mass budget." },
+              { week: 12, theme: "X-15 & HTV-2 Case Studies", weekday: { label: "Reading", content: "X-15 flight research papers (NTRS) + HTV-2 DARPA flight test summary documents. What was learned thermally? How did predictions compare to flight data?" }, weekend: { label: "Assignment", content: "Compare X-15 and HTV-2 TPS approaches and flight thermal environments. What correlated well with analysis? What didn't? Write a 2-page technical lessons-learned summary." }, project: "PROJECT CHECK-IN 6: Full report drafted. Figures complete." },
+              { week: 13, theme: "Module Review & Project Finalization", weekday: { label: "Review", content: "Review all notes. Revisit the Fay-Riddell calculation and real gas effects — these are tested constantly in the field." }, weekend: { label: "Project Completion", content: "Finalize Hypersonic Vehicle Aeroheating Analysis. Deliverables: trajectory-based heating environment, TPS zoning map, material trade, mass budget, formal engineering report." }, project: "PROJECT COMPLETE: Hypersonic Aeroheating Analysis — engineering-grade TPS sizing report." }
+            ]
+          },
+          {
+            id: 6,
+            title: "Scramjets & Hypersonic Propulsion",
+            subtitle: "Thermodynamics at the edge of what's physically possible",
+            duration: "14 weeks",
+            weeks: [
+              { week: 1, theme: "Ramjet Cycle Fundamentals", weekday: { label: "Reading", content: "Heiser & Pratt Ch. 1–3: Ramjet thermodynamic cycle, inlet compression, combustion, nozzle expansion, station numbering" }, weekend: { label: "Problem Set", content: "Perform a complete 1D ramjet cycle analysis at Mach 3, 30km altitude. Calculate: inlet total pressure recovery, combustor entry conditions, heat addition for a given fuel, exit conditions, thrust, and Isp." }, project: "PROJECT KICKOFF: Set up your Python tool architecture. Define: input parameters, station numbering (0,1,2,3,4,9), data structures, and output variables." },
+              { week: 2, theme: "Inlet Design & Total Pressure Recovery", weekday: { label: "Reading", content: "Heiser & Pratt Ch. 4: Inlet types (external compression, mixed, internal), shock trains, MIL-E-5007 recovery specs, inlet starting problem" }, weekend: { label: "Problem Set", content: "Calculate total pressure recovery for a 3-shock external compression inlet at Mach 5, 8, 12. Optimize shock angles for maximum recovery. Plot recovery vs Mach for fixed geometry vs variable geometry." }, project: null },
+              { week: 3, theme: "Isolator Physics", weekday: { label: "Reading", content: "Heiser & Pratt Ch. 5 + Waltrup & Billig isolator papers. Pseudo-shock structure, isolator length requirements, back-pressure management." }, weekend: { label: "Problem Set", content: "Size an isolator for your scramjet combustor at Mach 4 combustor entry. Given: back-pressure ratio from combustion, calculate required isolator length-to-diameter ratio using Billig's correlation. Code this into your tool." }, project: "PROJECT CHECK-IN 1: Inlet module coded. Given Mach and altitude, computes total pressure recovery and combustor entry conditions." },
+              { week: 4, theme: "Supersonic Combustion Fundamentals", weekday: { label: "Reading", content: "Curran & Murthy Ch. 3–4: Supersonic combustion challenges, ignition delay, flameholding, mixing enhancement, fuel injection strategies" }, weekend: { label: "Assignment", content: "Research flameholding mechanisms: cavity, strut, pylon, wall injector. For each: mixing efficiency, total pressure loss, thermal load on holder, TRL. Write a 2-page technical comparison." }, project: null },
+              { week: 5, theme: "Rayleigh Flow — Heat Addition in Supersonic Flow", weekday: { label: "Reading", content: "Heiser & Pratt Ch. 6: Rayleigh line analysis, maximum heat addition before thermal choking, total pressure loss from heat addition" }, weekend: { label: "Problem Set", content: "For your combustor at Mach 2.5 entry (scramjet mode): calculate maximum heat addition before thermal choking. For H2 fuel at φ=0.8, does combustion thermally choke? Code this into your tool." }, project: "PROJECT CHECK-IN 2: Combustor module coded. Rayleigh flow heat addition, thermal choking check, total pressure loss computed." },
+              { week: 6, theme: "Hydrogen vs Hydrocarbon Scramjet Fuels", weekday: { label: "Reading", content: "AIAA papers on hydrocarbon scramjet fuels: JP-7, JP-10, endothermic fuels, cracking reactions, coking problems (search AIAA Arc: 'hydrocarbon scramjet fuel')" }, weekend: { label: "Assignment", content: "Compare H2 vs JP-7 for a Mach 8 scramjet: Isp, volumetric energy density, ignition delay, cooling capacity (endothermic fuels!), vehicle integration. Which for a cruise missile? For a two-stage-to-orbit first stage?" }, project: null },
+              { week: 7, theme: "Dual-Mode Ramjet/Scramjet Transition", weekday: { label: "Reading", content: "Waltrup et al. dual-mode papers + X-51A Waverider program technical papers. Mode transition: how does an engine go from ramjet to scramjet mode?" }, weekend: { label: "Problem Set", content: "In your tool, implement mode detection: given combustor entry Mach number, determine ramjet vs scramjet mode. Transition Mach: ~Mach 5–6 at combustor entry. Verify your tool switches modes correctly." }, project: "PROJECT CHECK-IN 3: Dual-mode logic implemented. Tool correctly computes ramjet mode below transition and scramjet mode above." },
+              { week: 8, theme: "Nozzle Expansion & Thrust Calculation", weekday: { label: "Reading", content: "Heiser & Pratt Ch. 7: Scramjet nozzle, under-expanded flow, external expansion on vehicle aftbody, thrust accounting" }, weekend: { label: "Problem Set", content: "Complete nozzle module for your tool: given combustor exit conditions, expand to ambient pressure, calculate gross thrust and net thrust. Compute Isp. Run at Mach 5, 8, 10 and plot Isp vs Mach." }, project: null },
+              { week: 9, theme: "Turbine-Based Combined Cycle (TBCC)", weekday: { label: "Reading", content: "AIAA papers on TBCC: turbine + ramjet + scramjet in one flowpath. Mode transitions, shared inlet design, turbine bypass." }, weekend: { label: "Assignment", content: "Add a TBCC wrapper to your analysis: turbojet mode below Mach 2.5, ramjet mode Mach 2.5–5, scramjet mode above Mach 5. Plot Isp across the full envelope from Mach 0 to 12." }, project: "PROJECT CHECK-IN 4: TBCC mode added. Full Isp vs Mach curve plotted and validated against published literature." },
+              { week: 10, theme: "Waveriders & Thermal Management in Scramjets", weekday: { label: "Reading", content: "AIAA papers on waverider design + X-51A configuration + AIAA papers on scramjet wall cooling: regenerative cooling, endothermic fuel cooling, heat sink structures" }, weekend: { label: "Problem Set", content: "Calculate wall heat flux in your scramjet combustor (Eckert method). With H2 regenerative cooling, calculate fuel temperature rise. Does the fuel flash? Is there sufficient cooling margin? Add cooling margin output to your tool." }, project: "PROJECT CHECK-IN 5: Combustor wall thermal analysis added to tool. Cooling margin output computed." },
+              { week: 11, theme: "Rotating Detonation Engines & Testing", weekday: { label: "Reading", content: "Recent AIAA papers on RDE (2021–2025) + University of Queensland HyShot papers + NASA Langley 8-Ft HTT facility papers" }, weekend: { label: "Problem Set + Assignment", content: "Compare RDE vs scramjet on a Mach 6 cruise mission: Isp from Humphrey cycle vs Brayton cycle. Separately: validate your tool against published HyShot II or X-51A data. Document what matches, what doesn't, and why." }, project: "PROJECT CHECK-IN 6: Tool validated against published data. Discrepancies documented and explained." },
+              { week: 12, theme: "Module Review & Project Finalization", weekday: { label: "Review", content: "Review all scramjet theory. Re-derive Rayleigh flow equations from scratch — if you can do this cold, you own the material." }, weekend: { label: "Project Completion", content: "Finalize Dual-Mode Scramjet Cycle Analysis Tool. Deliverables: Python tool with full documentation, validation report against published data, Isp vs Mach plot across all modes, technical write-up." }, project: "PROJECT COMPLETE: Dual-Mode Scramjet Analysis Tool — Python tool + validation report." }
+            ]
+          },
+          {
+            id: 7,
+            title: "Directed Energy & HEL Systems",
+            subtitle: "Photons as weapons — the thermodynamics of destruction",
+            duration: "14 weeks",
+            weeks: [
+              { week: 1, theme: "Laser Physics Fundamentals", weekday: { label: "Reading", content: "Siegman Ch. 1–3: Stimulated emission, population inversion, gain media, laser rate equations, threshold conditions" }, weekend: { label: "Problem Set", content: "Derive threshold condition for a 4-level laser system. For a Nd:YAG gain medium: calculate threshold pump power given stimulated emission cross-section, upper state lifetime, mode volume. Understand where waste heat comes from." }, project: "PROJECT KICKOFF: Define your HEL system: 100 kW solid-state laser, mobile ground platform. Document: power chain assumptions, cooling requirements to investigate, architecture options." },
+              { week: 2, theme: "High-Power Laser Types", weekday: { label: "Reading", content: "Siegman Ch. 5–7 + SPIE papers on fiber lasers, slab lasers, thin disk lasers, and chemical lasers (COIL/DPAL). Power scaling approaches and thermal limits for each." }, weekend: { label: "Assignment", content: "Compare fiber laser vs slab laser vs thin disk for a 100 kW system. For each: beam quality (M²), wall-plug efficiency, thermal load per unit power, cooling approach, current TRL. Build a trade table." }, project: null },
+              { week: 3, theme: "Beam Quality & Atmospheric Propagation", weekday: { label: "Reading", content: "Siegman Ch. 16–17: Beam quality, M² measurement, beam parameter product + Sprangle et al. NRL atmospheric propagation papers (free online)" }, weekend: { label: "Problem Set", content: "For a 100 kW fiber laser (M²=1.5, aperture=0.3m): calculate far-field beam diameter at 1 km, 3 km, 5 km. Calculate intensity at target. Then calculate thermal blooming severity index at 1 km range, sea-level, 5 m/s crosswind." }, project: "PROJECT CHECK-IN 1: Power chain mapped. Wall plug → gain medium → beam. Efficiency at each stage estimated. Total waste heat load quantified." },
+              { week: 4, theme: "Adaptive Optics & Gain Medium Thermal Management", weekday: { label: "Reading", content: "SPIE papers on adaptive optics for HEL (wavefront sensing, deformable mirrors) + SPIE papers on thermal management of high-power laser gain media: thermal lensing, stress birefringence" }, weekend: { label: "Problem Set", content: "Size an adaptive optics system for your HEL (actuator spacing, number of actuators, control bandwidth). Then model thermal lensing in your gain medium: calculate temperature gradient and resulting focal length. What cooling fixes it?" }, project: null },
+              { week: 5, theme: "Spectral Beam Combining & Power Electronics", weekday: { label: "Reading", content: "SPIE papers on spectral beam combining (SBC) and coherent beam combining (CBC) + IEEE papers on high-power laser drivers, IGBT thermal management, diode pump thermal loads" }, weekend: { label: "Problem Set", content: "For SBC of 10×10 kW fiber lasers: calculate grating efficiency, combining efficiency loss, and thermal load from combining. Size the liquid cooling system for your power electronics stack (assume 15% electronics loss = 17.6 kW waste heat)." }, project: "PROJECT CHECK-IN 2: Gain medium thermal load quantified. Cooling requirement calculated. Full thermal load budget: all sources quantified." },
+              { week: 6, theme: "Heat Rejection Architecture & Target Interaction", weekday: { label: "Reading", content: "AIAA/SPIE papers on mobile HEL platform heat rejection + SPIE papers on laser-material interaction: surface heating, ablation, melt-through, threshold fluence" }, weekend: { label: "Problem Set", content: "Design the heat rejection system for your 100 kW laser: total waste heat ~35 kW. Size: liquid-to-air HX, radiator, thermal storage options. Constrain: volume < 2m³, mass < 500 kg. Also calculate time to penetrate 3mm steel at 1 km range." }, project: "PROJECT CHECK-IN 3: Cooling architecture designed. Heat exchanger sized. Mass/volume budget. Range-performance curve plotted." },
+              { week: 7, theme: "System Integration, HPM & DE for Space", weekday: { label: "Reading", content: "AFRL/DARPA HEL-JTO public reports + RAND reports on directed energy integration + AFRL HPM program papers + AIAA papers on laser ASAT and debris removal" }, weekend: { label: "Assignment", content: "Write a 3-page HEL system trade analysis: 50 kW vs 100 kW vs 300 kW (engagement range, TMS mass, power source). Compare HEL vs HPM for drone defeat and electronics disruption missions. Analyze laser debris removal feasibility." }, project: "PROJECT CHECK-IN 4: Full system design document drafted. Power chain, thermal management, mass/volume/power budget, lethality curve." },
+              { week: 8, theme: "Module Review & Project Finalization", weekday: { label: "Review", content: "Review laser physics, propagation, and thermal management. Identify weakest area and do targeted re-reading." }, weekend: { label: "Project Completion", content: "Finalize HEL Thermal Management System Design. Deliverables: full power chain diagram, cooling architecture drawings, mass/volume/power budget table, lethality range curve, formal technical report." }, project: "PROJECT COMPLETE: 100 kW HEL Thermal Management Design — formal engineering report." }
+            ]
+          },
+          {
+            id: 8,
+            title: "Power Systems & Integration",
+            subtitle: "Everything needs power. Master the source.",
+            duration: "8 weeks",
+            weeks: [
+              { week: 1, theme: "Pulsed Power & High-Density Energy Storage", weekday: { label: "Reading", content: "AFRL pulsed power public papers + Sandia pulsed power lectures (YouTube) + IEEE papers on high-density capacitors, flywheels, advanced batteries. Ragone plot deep dive." }, weekend: { label: "Problem Set", content: "Size a capacitor bank for a 1 MJ pulsed load (100 ms pulse, 10 MW peak). Calculate: capacitance, voltage rating, charging time. Plot a Ragone chart for Li-ion, supercapacitor, flywheel, capacitor bank. Which has lowest system mass for a 30-second 100 kW engagement?" }, project: "PROJECT KICKOFF: Define your conceptual platform. Hypersonic glide vehicle, Mach 6 cruise, with 100 kW continuous HEL. Document: flight envelope, thermal environment, all power requirements." },
+              { week: 2, theme: "Compact Gas Turbines & Power Electronics", weekday: { label: "Reading", content: "AIAA papers on compact gas turbine APUs for tactical platforms + T-700 engine family papers + IEEE papers on wide-bandgap power electronics (SiC, GaN)" }, weekend: { label: "Problem Set", content: "Size a gas turbine APU for your platform: 200 kW shaft power. Calculate fuel burn rate, APU mass, waste heat. Then analyze the power electronics chain for your HEL: 270V DC bus → laser driver → gain medium. Efficiency, waste heat, and cooling requirement at each stage." }, project: "PROJECT CHECK-IN 1: Power requirements fully defined. All loads: propulsion, HEL, avionics, thermal control. Total power budget and electronics thermal load complete." },
+              { week: 3, theme: "Aeroheating + HEL Thermal Integration", weekday: { label: "Reading", content: "AIAA papers on combined aeroheating + internal heat management for hypersonic vehicles. TPS and active cooling co-design." }, weekend: { label: "Assignment", content: "The key integration challenge: at Mach 6, aeroheating comes IN and HEL waste heat is generated INSIDE. Map both heat sources. Where do they interact? Evaluate heat rejection options: (a) ram air HX, (b) fuel heat sink (JP-7 endothermic cracking), (c) radiator. Which is viable at Mach 6?" }, project: "PROJECT CHECK-IN 2: Aeroheating environment calculated. Internal heat sources quantified. Heat rejection options evaluated. Total thermal load on vehicle defined." },
+              { week: 4, theme: "System Architecture Integration & Capstone", weekday: { label: "Reading", content: "RAND reports on directed energy + hypersonic integration + DARPA program overviews on combined systems. Systems engineering perspective on platform co-design." }, weekend: { label: "Capstone Completion", content: "Draw the complete power and thermal architecture for your platform. Every arrow has a number (kW, kg/s, °C). Finalize Integrated Air Dominance Platform Architecture report: system architecture diagram, power + thermal budget, heat rejection trade, mass/volume summary, 15-page systems engineering report." }, project: "CAPSTONE COMPLETE: Integrated Hypersonic + HEL Platform Power & Thermal Architecture — your defining portfolio document." }
+            ]
+          }
+        ]
+      }
+    ];
+
+    // State
+    let activeTrack = "space";
+    let activeModule = null;
+    let expandedWeek = null;
+
+    // Elements
+    const trackTabsEl = document.getElementById('trackTabs');
+    const modulesListEl = document.getElementById('modulesList');
+    const mainEl = document.getElementById('main');
+
+    function init() {
+      renderTrackTabs();
+      renderSidebar();
+      renderMain();
+    }
+
+    function renderTrackTabs() {
+      trackTabsEl.innerHTML = '';
+      tracks.forEach(t => {
+        const btn = document.createElement('button');
+        btn.className = `track-tab ${t.id}` + (activeTrack === t.id ? ' active' : '');
+        btn.textContent = t.label;
+        btn.addEventListener('click', () => {
+          activeTrack = t.id;
+          activeModule = null;
+          expandedWeek = null;
+          renderTrackTabs();
+          renderSidebar();
+          renderMain();
+        });
+        trackTabsEl.appendChild(btn);
+      });
+    }
+
+    function renderSidebar() {
+      modulesListEl.innerHTML = '';
+      const track = tracks.find(t => t.id === activeTrack);
+      track.modules.forEach(m => {
+        const btn = document.createElement('button');
+        btn.className = 'module-btn' + (activeModule === m.id ? (activeTrack === 'space' ? ' active-space' : ' active-air') : '');
+        btn.addEventListener('click', () => {
+          activeModule = m.id;
+          expandedWeek = null;
+          renderSidebar();
+          renderMain();
+        });
+
+        const num = document.createElement('div');
+        num.className = 'module-num';
+        num.style.color = activeModule === m.id ? track.color : '#444';
+        num.textContent = 'MODULE ' + m.id;
+
+        const name = document.createElement('div');
+        name.className = 'module-name';
+        name.textContent = m.title;
+
+        const dur = document.createElement('div');
+        dur.className = 'module-dur';
+        dur.textContent = '⏱ ' + m.duration;
+
+        btn.appendChild(num);
+        btn.appendChild(name);
+        btn.appendChild(dur);
+
+        modulesListEl.appendChild(btn);
+      });
+    }
+
+    function renderMain() {
+      mainEl.innerHTML = '';
+      const track = tracks.find(t => t.id === activeTrack);
+      const module = activeModule !== null ? track.modules.find(m => m.id === activeModule) : null;
+
+      if (!module) {
+        const ph = document.createElement('div');
+        ph.className = 'placeholder';
+        ph.innerHTML = '<div class="placeholder-icon">⚗️</div><div class="placeholder-text">SELECT A MODULE TO BEGIN</div><div style="margin-top:12px;font-family:\'Share Tech Mono\', monospace;font-size:11px;color:#222">10 billion percent ready</div>';
+        mainEl.appendChild(ph);
+        return;
+      }
+
+      const header = document.createElement('div');
+      header.className = 'module-header';
+
+      const headerNum = document.createElement('div');
+      headerNum.className = 'module-header-num';
+      // label split: get track label right-hand side (after '—')
+      const rightLabel = (track.label.split('—')[1] || '').trim();
+      headerNum.style.color = track.color;
+      headerNum.textContent = `MODULE ${module.id} — ${rightLabel}`;
+
+      const headerTitle = document.createElement('div');
+      headerTitle.className = 'module-header-title';
+      headerTitle.textContent = module.title;
+
+      const headerSub = document.createElement('div');
+      headerSub.className = 'module-header-sub';
+      headerSub.textContent = module.subtitle;
+
+      const headerDur = document.createElement('div');
+      headerDur.className = 'module-header-dur';
+      headerDur.style.background = track.accent;
+      headerDur.style.color = track.color;
+      headerDur.style.border = `1px solid ${hexWithAlpha(track.color, 0.2)}`;
+      headerDur.textContent = `${module.duration} · 2 days/week · ~6 hrs/week`;
+
+      header.appendChild(headerNum);
+      header.appendChild(headerTitle);
+      header.appendChild(headerSub);
+      header.appendChild(headerDur);
+
+      mainEl.appendChild(header);
+
+      const weeksContainer = document.createElement('div');
+      weeksContainer.className = 'weeks-container';
+
+      module.weeks.forEach(w => {
+        const isOpen = expandedWeek === w.week;
+        const hasProject = !!w.project;
+
+        const card = document.createElement('div');
+        card.className = 'week-card' + (isOpen ? (activeTrack === 'space' ? ' open-space' : ' open-air') : '');
+
+        const weekHeader = document.createElement('div');
+        weekHeader.className = 'week-header';
+        weekHeader.addEventListener('click', () => {
+          expandedWeek = isOpen ? null : w.week;
+          renderMain();
+        });
+
+        const weekNum = document.createElement('div');
+        weekNum.className = 'week-num';
+        weekNum.style.color = track.color;
+        weekNum.textContent = 'WK ' + String(w.week).padStart(2, '0');
+
+        const weekTheme = document.createElement('div');
+        weekTheme.className = 'week-theme';
+        weekTheme.textContent = w.theme;
+
+        weekHeader.appendChild(weekNum);
+        weekHeader.appendChild(weekTheme);
+
+        if (hasProject) {
+          const dot = document.createElement('div');
+          dot.className = 'project-dot';
+          dot.title = 'Project checkpoint';
+          dot.style.background = track.color;
+          weekHeader.appendChild(dot);
+        }
+
+        const chevron = document.createElement('div');
+        chevron.className = 'chevron' + (isOpen ? ' open' : '');
+        chevron.textContent = '▼';
+        weekHeader.appendChild(chevron);
+
+        card.appendChild(weekHeader);
+
+        if (isOpen) {
+          const body = document.createElement('div');
+          body.className = 'week-body';
+
+          // weekday row
+          const row1 = document.createElement('div');
+          row1.className = 'activity-row';
+
+          const day1 = document.createElement('div');
+          day1.className = 'activity-day';
+          day1.style.color = track.color;
+          day1.innerHTML = 'WEEKDAY<br/><span style="color:#444;font-size:8px">2 HRS</span>';
+
+          const type1 = document.createElement('div');
+          type1.className = 'activity-type';
+          type1.style.background = hexWithAlpha(track.color, 0.08);
+          type1.style.color = track.color;
+          type1.style.border = `1px solid ${hexWithAlpha(track.color,0.2)}`;
+          type1.textContent = (w.weekday.label || '').toUpperCase();
+
+          const content1 = document.createElement('div');
+          content1.className = 'activity-content';
+          content1.textContent = w.weekday.content || '';
+
+          row1.appendChild(day1);
+          row1.appendChild(type1);
+          row1.appendChild(content1);
+
+          // weekend row
+          const row2 = document.createElement('div');
+          row2.className = 'activity-row';
+
+          const day2 = document.createElement('div');
+          day2.className = 'activity-day';
+          day2.style.color = track.color;
+          day2.innerHTML = 'WEEKEND<br/><span style="color:#444;font-size:8px">4 HRS</span>';
+
+          const type2 = document.createElement('div');
+          type2.className = 'activity-type';
+          type2.style.background = hexWithAlpha(track.color, 0.08);
+          type2.style.color = track.color;
+          type2.style.border = `1px solid ${hexWithAlpha(track.color,0.2)}`;
+          type2.textContent = (w.weekend.label || '').toUpperCase();
+
+          const content2 = document.createElement('div');
+          content2.className = 'activity-content';
+          content2.textContent = w.weekend.content || '';
+
+          row2.appendChild(day2);
+          row2.appendChild(type2);
+          row2.appendChild(content2);
+
+          body.appendChild(row1);
+          body.appendChild(row2);
+
+          if (hasProject) {
+            const pBox = document.createElement('div');
+            pBox.className = 'project-box';
+            pBox.style.borderColor = track.color;
+            pBox.style.background = hexWithAlpha(track.color, 0.03);
+
+            const pLabel = document.createElement('div');
+            pLabel.className = 'project-box-label';
+            pLabel.style.color = track.color;
+            pLabel.textContent = '◆ PROJECT';
+
+            const pText = document.createElement('div');
+            pText.className = 'project-box-text';
+            pText.textContent = w.project;
+
+            pBox.appendChild(pLabel);
+            pBox.appendChild(pText);
+
+            body.appendChild(pBox);
+          }
+
+          card.appendChild(body);
+        }
+
+        weeksContainer.appendChild(card);
+      });
+
+      mainEl.appendChild(weeksContainer);
+    }
+
+    // Helper: convert hex color to rgba string with alpha (input like "#00d4ff")
+    function hexWithAlpha(hex, alpha) {
+      if (!hex) return `rgba(0,0,0,${alpha})`;
+      const h = hex.replace('#','');
+      const bigint = parseInt(h.length === 3 ? h.split('').map(c => c+c).join('') : h, 16);
+      const r = (bigint >> 16) & 255;
+      const g = (bigint >> 8) & 255;
+      const b = bigint & 255;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // Initialize UI
+    init();
+
+    // Allow keyboard navigation: numbers 1..9 select modules if visible
+    window.addEventListener('keydown', (e) => {
+      if (e.key >= '1' && e.key <= '9') {
+        const t = tracks.find(t => t.id === activeTrack);
+        if (!t) return;
+        const idx = parseInt(e.key,10) - 1;
+        if (idx >= 0 && idx < t.modules.length) {
+          activeModule = t.modules[idx].id;
+          expandedWeek = null;
+          renderSidebar();
+          renderMain();
+        }
+      }
+    });
+  </script>
 </body>
 </html>
